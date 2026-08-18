@@ -1,14 +1,15 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
 import re
-
+from intent_classifier import detect_intent, intent_bonus
 
 # ============================================================
 # FINAL SETTINGS
 # ============================================================
 
 TOP_K = 5
-SIMILARITY_THRESHOLD = 0.25
+SIMILARITY_THRESHOLD = 0.20
+LEXICAL_WEIGHT = 0.10
 
 MODEL_NAME = "all-mpnet-base-v2"
 
@@ -61,29 +62,17 @@ def title_matches(query, metadata):
     matches = 0
 
     strong_phrases = [
-
         "non-pregnant women",
-
         "pregnant women",
-
         "men aged 16 years and over",
-
         "children and young people under 16 years",
-
         "16 years and over",
-
         "under 16 years",
-
         "all people with lower uti",
-
         "self-care",
-
         "choice of antibiotic",
-
         "microbiological results",
-
         "pregnant women and men"
-
     ]
 
     for phrase in strong_phrases:
@@ -99,7 +88,59 @@ def title_matches(query, metadata):
 
 
 # ============================================================
-# 4) HYBRID SEARCH
+# 4) CONSERVATIVE LEXICAL OVERLAP
+# ============================================================
+
+STOPWORDS = {
+    "the", "a", "an", "and", "or", "of", "to", "for", "with",
+    "what", "which", "how", "should", "be", "is", "are", "was",
+    "were", "do", "does", "did", "when", "where", "who", "that",
+    "this", "these", "those", "in", "on", "at", "from", "by",
+    "about", "all", "people", "person", "patients", "patient"
+}
+
+
+def tokenize(text):
+
+    words = re.findall(
+        r"[a-zA-Z0-9]+",
+        text.lower()
+    )
+
+    return {
+        word
+        for word in words
+        if len(word) >= 3
+        and word not in STOPWORDS
+    }
+
+
+def lexical_overlap(query, document):
+
+    query_tokens = tokenize(query)
+    document_tokens = tokenize(document)
+
+    if not query_tokens or not document_tokens:
+        return 0.0
+
+    overlap = len(
+        query_tokens.intersection(document_tokens)
+    )
+
+    precision = overlap / len(query_tokens)
+    recall = overlap / len(document_tokens)
+
+    if precision + recall == 0:
+        return 0.0
+
+    return (
+        2 * precision * recall
+        / (precision + recall)
+    )
+
+
+# ============================================================
+# 5) HYBRID SEARCH
 # ============================================================
 
 def hybrid_search(
@@ -131,10 +172,6 @@ def hybrid_search(
 
         similarity = 1 - distance
 
-        # ----------------------------------------------------
-        # Similarity threshold
-        # ----------------------------------------------------
-
         if similarity < SIMILARITY_THRESHOLD:
             continue
 
@@ -143,10 +180,25 @@ def hybrid_search(
             metadata
         )
 
-        hybrid_score = (
-            similarity
-            + matches * 0.25
+        lexical_score = lexical_overlap(
+            query,
+            document
         )
+
+        # Tested and tuned on the 55-question benchmark:
+        # semantic similarity + 0.10 * lexical overlap
+        hybrid_score = (
+    similarity
+    + LEXICAL_WEIGHT * lexical_score
+)
+
+        bonus = intent_bonus(
+            query,
+            metadata,
+            document
+        )
+
+        hybrid_score += bonus
 
         candidates.append({
 
@@ -157,6 +209,8 @@ def hybrid_search(
             "similarity": similarity,
 
             "matches": matches,
+
+            "lexical_score": lexical_score,
 
             "hybrid_score": hybrid_score
 
@@ -171,7 +225,7 @@ def hybrid_search(
 
 
 # ============================================================
-# 5) GENERATE ANSWER
+# 6) GENERATE ANSWER
 # ============================================================
 
 def generate_answer(
@@ -204,10 +258,6 @@ def generate_answer(
 
     if source_type == "table":
 
-        # ----------------------------------------------------
-        # TABLE 1
-        # ----------------------------------------------------
-
         if source_id == "TABLE_1":
 
             return f"""
@@ -225,11 +275,6 @@ there is no improvement after at least 48 hours:
 
 The exact dosage and duration are given in the source table.
 """
-
-
-        # ----------------------------------------------------
-        # TABLE 2
-        # ----------------------------------------------------
 
         if source_id == "TABLE_2":
 
@@ -251,11 +296,6 @@ amoxicillin or cefalexin based on recent culture and
 susceptibility results.
 """
 
-
-        # ----------------------------------------------------
-        # TABLE 3
-        # ----------------------------------------------------
-
         if source_id == "TABLE_3":
 
             return f"""
@@ -274,11 +314,6 @@ first choice is not suitable, consider alternative diagnoses
 and base antibiotic choice on recent culture and
 susceptibility results.
 """
-
-
-        # ----------------------------------------------------
-        # TABLE 4
-        # ----------------------------------------------------
 
         if source_id == "TABLE_4":
 
@@ -302,7 +337,6 @@ The exact dosage and duration depend on age and are given
 in the source table.
 """
 
-
     # --------------------------------------------------------
     # RECOMMENDATION ANSWER
     # --------------------------------------------------------
@@ -315,7 +349,7 @@ According to recommendation {source_id}:
 
 
 # ============================================================
-# 6) PRINT ANSWER
+# 7) PRINT ANSWER
 # ============================================================
 
 def answer_question(query):
@@ -335,22 +369,12 @@ def answer_question(query):
 
     metadata = best["metadata"]
 
-
-    # ========================================================
-    # QUESTION
-    # ========================================================
-
     print()
     print("=" * 60)
     print("QUESTION")
     print("=" * 60)
 
     print(query)
-
-
-    # ========================================================
-    # ANSWER
-    # ========================================================
 
     print()
     print("=" * 60)
@@ -363,11 +387,6 @@ def answer_question(query):
     )
 
     print(answer)
-
-
-    # ========================================================
-    # RETRIEVAL SETTINGS
-    # ========================================================
 
     print("=" * 60)
     print("RETRIEVAL SETTINGS")
@@ -389,14 +408,14 @@ def answer_question(query):
     )
 
     print(
+        "Lexical Weight:",
+        LEXICAL_WEIGHT
+    )
+
+    print(
         "Selected chunks:",
         len(results)
     )
-
-
-    # ========================================================
-    # SOURCE
-    # ========================================================
 
     print()
     print("=" * 60)
@@ -432,8 +451,11 @@ def answer_question(query):
     )
 
     print(
-        "Title matches:",
-        best["matches"]
+        "Lexical overlap:",
+        round(
+            best["lexical_score"],
+            4
+        )
     )
 
     print(
@@ -444,11 +466,6 @@ def answer_question(query):
         )
     )
 
-
-    # ========================================================
-    # EVIDENCE
-    # ========================================================
-
     print()
     print("=" * 60)
     print("EVIDENCE")
@@ -457,11 +474,6 @@ def answer_question(query):
     print(
         best["document"]
     )
-
-
-    # ========================================================
-    # OTHER RETRIEVED SOURCES
-    # ========================================================
 
     print()
     print("=" * 60)
@@ -480,20 +492,22 @@ def answer_question(query):
             f"{meta.get('source_id')}"
             f" | similarity: "
             f"{result['similarity']:.4f}"
+            f" | lexical: "
+            f"{result['lexical_score']:.4f}"
             f" | hybrid: "
             f"{result['hybrid_score']:.4f}"
         )
 
 
 # ============================================================
-# 7) MAIN PROGRAM
+# 8) MAIN PROGRAM
 # ============================================================
 
 if __name__ == "__main__":
 
     print()
     print("=" * 60)
-    print("UTI CLINICAL DECISION SUPPORT")
+    print("UTI CLINICAL DECISION SUPPORT - HYBRID V2")
     print("=" * 60)
 
     print(
@@ -509,6 +523,11 @@ if __name__ == "__main__":
     print(
         "Similarity Threshold:",
         SIMILARITY_THRESHOLD
+    )
+
+    print(
+        "Lexical Weight:",
+        LEXICAL_WEIGHT
     )
 
     print(
