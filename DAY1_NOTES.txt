@@ -1,0 +1,48 @@
+DAY 1 – TECHNICAL DECISIONS
+
+1. Source Selection
+
+We selected a NICE guideline on urinary tract infection because it provides structured clinical recommendations, antibiotic tables, and page-level evidence suitable for a grounded clinical decision support system.
+
+2. Legal Usability
+
+The NICE guideline was selected as the clinical source, with reuse and attribution requirements taken into account.
+
+3. Document Parsing
+
+The guideline was processed into structured text while preserving important clinical sections and antibiotic tables.
+
+4. Chunking Strategy
+
+We used a section-aware approach rather than simple fixed-size chunks.
+
+Clinical recommendations and antibiotic tables were preserved as separate chunks so that important clinical context, dosage information, and source structure were not split incorrectly.
+
+5. Embedding Model
+
+We used all-MiniLM-L6-v2 from Sentence Transformers.
+
+It is lightweight, runs locally, requires no API cost, and is suitable for semantic retrieval in a hackathon environment.
+
+6. Vector Database
+
+We used ChromaDB because it is lightweight, local, easy to set up, and suitable for a small-scale hackathon retrieval system.
+
+7. Metadata
+
+Each chunk contains source information such as source ID, source type, title, and page number.
+
+This allows retrieved evidence to be traced back to the original guideline.
+
+8. Initial Retrieval Validation
+
+We tested clinical questions against the vector database and verified that the four main antibiotic tables could be retrieved correctly:
+
+TABLE_1 – non-pregnant women
+TABLE_2 – pregnant women
+TABLE_3 – men
+TABLE_4 – children and young people
+
+9. Day 1 Status
+
+The project has a working queryable vector index with structured chunks, embeddings, metadata, and source-based evidence retrieval.

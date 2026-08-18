@@ -4,29 +4,44 @@ import re
 
 
 # ============================================================
+# FINAL SETTINGS
+# ============================================================
+
+TOP_K = 5
+SIMILARITY_THRESHOLD = 0.25
+
+MODEL_NAME = "all-mpnet-base-v2"
+
+DATABASE_PATH = "./chroma_db_mpnet"
+COLLECTION_NAME = "uti_guideline_mpnet"
+
+
+# ============================================================
 # 1) LOAD EMBEDDING MODEL
 # ============================================================
 
 print("Loading embedding model...")
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(
+    MODEL_NAME
+)
 
 print("Embedding model loaded")
 
 
 # ============================================================
-# 2) LOAD CHROMA DATABASE
+# 2) LOAD FINAL VECTOR DATABASE
 # ============================================================
 
 client = chromadb.PersistentClient(
-    path="./chroma_db"
+    path=DATABASE_PATH
 )
 
 collection = client.get_collection(
-    name="uti_guideline"
+    name=COLLECTION_NAME
 )
 
-print("Vector database loaded")
+print("Final vector database loaded")
 print("Documents:", collection.count())
 
 
@@ -36,44 +51,49 @@ print("Documents:", collection.count())
 
 def title_matches(query, metadata):
 
-    title = metadata.get("title", "").lower()
+    title = metadata.get(
+        "title",
+        ""
+    ).lower()
 
     query_lower = query.lower()
 
-    query_words = re.findall(
-        r"[a-zA-Z]+",
-        query_lower
-    )
-
     matches = 0
 
-    # General word matching
-    for word in query_words:
+    strong_phrases = [
 
-        if len(word) < 3:
-            continue
+        "non-pregnant women",
 
-        if word in title:
-            matches += 1
+        "pregnant women",
 
-    # Important clinical table matching
-    if "non-pregnant" in query_lower and "non-pregnant" in title:
-        matches += 3
+        "men aged 16 years and over",
 
-    if "pregnant" in query_lower and "pregnant" in title:
-        matches += 3
+        "children and young people under 16 years",
 
-    if "men" in query_lower and "men" in title:
-        matches += 3
+        "16 years and over",
 
-    if "children" in query_lower and "children" in title:
-        matches += 3
+        "under 16 years",
 
-    if "under 16" in query_lower and "under 16" in title:
-        matches += 2
+        "all people with lower uti",
 
-    if "16 years and over" in query_lower and "16 years and over" in title:
-        matches += 2
+        "self-care",
+
+        "choice of antibiotic",
+
+        "microbiological results",
+
+        "pregnant women and men"
+
+    ]
+
+    for phrase in strong_phrases:
+
+        if (
+            phrase in query_lower
+            and phrase in title
+        ):
+
+            matches += 4
 
     return matches
 
@@ -82,54 +102,66 @@ def title_matches(query, metadata):
 # 4) HYBRID SEARCH
 # ============================================================
 
-def hybrid_search(query, top_k=5):
+def hybrid_search(
+    query,
+    top_k=TOP_K
+):
 
     query_embedding = model.encode(
         [query],
         normalize_embeddings=True
     )[0].tolist()
 
-    # Search all documents
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=collection.count()
     )
 
-    documents = results["documents"][0]
-    metadatas = results["metadatas"][0]
-    distances = results["distances"][0]
-
     candidates = []
 
-    for document, metadata, distance in zip(
-        documents,
-        metadatas,
-        distances
+    for (
+        document,
+        metadata,
+        distance
+    ) in zip(
+        results["documents"][0],
+        results["metadatas"][0],
+        results["distances"][0]
     ):
+
+        similarity = 1 - distance
+
+        # ----------------------------------------------------
+        # Similarity threshold
+        # ----------------------------------------------------
+
+        if similarity < SIMILARITY_THRESHOLD:
+            continue
 
         matches = title_matches(
             query,
             metadata
         )
 
-        # Semantic similarity
-        semantic_score = 1 - distance
-
-        # Hybrid score
         hybrid_score = (
-            semantic_score
-            + (matches * 0.25)
+            similarity
+            + matches * 0.25
         )
 
         candidates.append({
+
             "document": document,
+
             "metadata": metadata,
-            "distance": distance,
+
+            "similarity": similarity,
+
             "matches": matches,
+
             "hybrid_score": hybrid_score
+
         })
 
-    # Highest score first
     candidates.sort(
         key=lambda x: x["hybrid_score"],
         reverse=True
@@ -139,12 +171,16 @@ def hybrid_search(query, top_k=5):
 
 
 # ============================================================
-# 5) GENERATE SOURCE-BASED ANSWER
+# 5) GENERATE ANSWER
 # ============================================================
 
-def generate_answer(query, best):
+def generate_answer(
+    query,
+    best
+):
 
     metadata = best["metadata"]
+
     text = best["document"]
 
     source_type = metadata.get(
@@ -162,18 +198,16 @@ def generate_answer(query, best):
         ""
     )
 
-    pages = metadata.get(
-        "pages",
-        ""
-    )
-
     # --------------------------------------------------------
-    # Table-based answer
+    # TABLE ANSWERS
     # --------------------------------------------------------
 
     if source_type == "table":
 
-        # Non-pregnant women
+        # ----------------------------------------------------
+        # TABLE 1
+        # ----------------------------------------------------
+
         if source_id == "TABLE_1":
 
             return f"""
@@ -192,7 +226,11 @@ there is no improvement after at least 48 hours:
 The exact dosage and duration are given in the source table.
 """
 
-        # Pregnant women
+
+        # ----------------------------------------------------
+        # TABLE 2
+        # ----------------------------------------------------
+
         if source_id == "TABLE_2":
 
             return f"""
@@ -205,11 +243,19 @@ Second choices:
 - Amoxicillin, only if culture results are available and susceptible
 - Cefalexin
 
-The table also gives antibiotic choices for asymptomatic
-bacteriuria based on recent culture and susceptibility results.
+Alternative second choices should be based on culture and
+susceptibility results.
+
+For asymptomatic bacteriuria, choose from nitrofurantoin,
+amoxicillin or cefalexin based on recent culture and
+susceptibility results.
 """
 
-        # Men
+
+        # ----------------------------------------------------
+        # TABLE 3
+        # ----------------------------------------------------
+
         if source_id == "TABLE_3":
 
             return f"""
@@ -219,15 +265,29 @@ First choices:
 - Trimethoprim
 - Nitrofurantoin, when eGFR is 45 ml/minute or more
 
-The source specifically states that nitrofurantoin is not
-recommended for men with suspected prostate involvement.
+Nitrofurantoin is not recommended for men with suspected
+prostate involvement because it is unlikely to reach
+therapeutic levels in the prostate.
+
+If there is no improvement after at least 48 hours, or the
+first choice is not suitable, consider alternative diagnoses
+and base antibiotic choice on recent culture and
+susceptibility results.
 """
 
-        # Children
+
+        # ----------------------------------------------------
+        # TABLE 4
+        # ----------------------------------------------------
+
         if source_id == "TABLE_4":
 
             return f"""
 According to {title}:
+
+Children under 3 months:
+- Refer to a paediatric specialist and treat with intravenous
+  antibiotics according to the relevant NICE guideline.
 
 For children aged 3 months and over, first choices include:
 - Trimethoprim, when there is a low risk of resistance
@@ -238,12 +298,13 @@ Second choices include:
 - Amoxicillin, when culture results are available and susceptible
 - Cefalexin
 
-Children under 3 months should be referred to a paediatric
-specialist according to the source.
+The exact dosage and duration depend on age and are given
+in the source table.
 """
 
+
     # --------------------------------------------------------
-    # Recommendation-based answer
+    # RECOMMENDATION ANSWER
     # --------------------------------------------------------
 
     return f"""
@@ -261,10 +322,12 @@ def answer_question(query):
 
     results = hybrid_search(
         query,
-        top_k=5
+        top_k=TOP_K
     )
 
     if not results:
+
+        print()
         print("No evidence found.")
         return
 
@@ -272,21 +335,25 @@ def answer_question(query):
 
     metadata = best["metadata"]
 
+
     # ========================================================
     # QUESTION
     # ========================================================
 
-    print("\n" + "=" * 60)
+    print()
+    print("=" * 60)
     print("QUESTION")
     print("=" * 60)
 
     print(query)
 
+
     # ========================================================
     # ANSWER
     # ========================================================
 
-    print("\n" + "=" * 60)
+    print()
+    print("=" * 60)
     print("ANSWER")
     print("=" * 60)
 
@@ -297,10 +364,41 @@ def answer_question(query):
 
     print(answer)
 
+
+    # ========================================================
+    # RETRIEVAL SETTINGS
+    # ========================================================
+
+    print("=" * 60)
+    print("RETRIEVAL SETTINGS")
+    print("=" * 60)
+
+    print(
+        "Embedding Model:",
+        MODEL_NAME
+    )
+
+    print(
+        "Top-K:",
+        TOP_K
+    )
+
+    print(
+        "Cosine Similarity Threshold:",
+        SIMILARITY_THRESHOLD
+    )
+
+    print(
+        "Selected chunks:",
+        len(results)
+    )
+
+
     # ========================================================
     # SOURCE
     # ========================================================
 
+    print()
     print("=" * 60)
     print("SOURCE")
     print("=" * 60)
@@ -326,39 +424,64 @@ def answer_question(query):
     )
 
     print(
-        "Hybrid score:",
-        round(best["hybrid_score"], 4)
+        "Similarity:",
+        round(
+            best["similarity"],
+            4
+        )
     )
+
+    print(
+        "Title matches:",
+        best["matches"]
+    )
+
+    print(
+        "Hybrid score:",
+        round(
+            best["hybrid_score"],
+            4
+        )
+    )
+
 
     # ========================================================
     # EVIDENCE
     # ========================================================
 
-    print("\n" + "=" * 60)
+    print()
+    print("=" * 60)
     print("EVIDENCE")
     print("=" * 60)
 
-    print(best["document"])
+    print(
+        best["document"]
+    )
+
 
     # ========================================================
-    # RETRIEVAL RESULTS
+    # OTHER RETRIEVED SOURCES
     # ========================================================
 
-    print("\n" + "=" * 60)
+    print()
+    print("=" * 60)
     print("OTHER RETRIEVED SOURCES")
     print("=" * 60)
 
-    for i, result in enumerate(results[1:], start=2):
+    for i, result in enumerate(
+        results[1:],
+        start=2
+    ):
 
         meta = result["metadata"]
 
         print(
-            f"{i}.",
-            meta.get("source_id"),
-            "|",
-            meta.get("source_type"),
-            "| score:",
-            round(result["hybrid_score"], 4)
+            f"{i}. "
+            f"{meta.get('source_id')}"
+            f" | similarity: "
+            f"{result['similarity']:.4f}"
+            f" | hybrid: "
+            f"{result['hybrid_score']:.4f}"
         )
 
 
@@ -369,22 +492,49 @@ def answer_question(query):
 if __name__ == "__main__":
 
     print()
+    print("=" * 60)
     print("UTI CLINICAL DECISION SUPPORT")
     print("=" * 60)
-    print("Hybrid Retrieval + Evidence")
-    print("Type 'exit' to quit.")
+
+    print(
+        "Embedding:",
+        MODEL_NAME
+    )
+
+    print(
+        "Top-K:",
+        TOP_K
+    )
+
+    print(
+        "Similarity Threshold:",
+        SIMILARITY_THRESHOLD
+    )
+
+    print(
+        "Type 'exit' to quit."
+    )
+
     print()
 
     while True:
 
-        question = input("Question: ").strip()
+        question = input(
+            "Question: "
+        ).strip()
 
         if question.lower() == "exit":
 
-            print("Goodbye.")
+            print(
+                "Goodbye."
+            )
+
             break
 
         if not question:
+
             continue
 
-        answer_question(question)
+        answer_question(
+            question
+        )
