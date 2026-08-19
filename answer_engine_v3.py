@@ -154,7 +154,8 @@ def input_risk_check(query):
 
     # Personal medical advice
     for pattern in PERSONAL_ADVICE_PATTERNS:
-        if pattern in q:
+        pattern_re = r"\b" + re.escape(pattern) + r"\b"
+        if re.search(pattern_re, q):
             return False, "Personal medical advice is outside the system scope."
 
     # Known out-of-scope medical topics.
@@ -294,6 +295,7 @@ if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("V3 TESTING COMPLETED")
     print("=" * 70)
+
 
 
 

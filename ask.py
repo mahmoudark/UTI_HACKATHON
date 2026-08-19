@@ -1,4 +1,4 @@
-import chromadb
+﻿import chromadb
 from sentence_transformers import SentenceTransformer
 import re
 from intent_classifier import detect_intent, intent_bonus
@@ -8,7 +8,7 @@ from intent_classifier import detect_intent, intent_bonus
 # ============================================================
 
 TOP_K = 4
-SIMILARITY_THRESHOLD = 0.20
+SIMILARITY_THRESHOLD = 0.60
 LEXICAL_WEIGHT = 0.10
 
 MODEL_NAME = "all-mpnet-base-v2"
@@ -170,54 +170,28 @@ def hybrid_search(
         results["distances"][0]
     ):
 
-        similarity = 1 - distance
+        # Chroma returns squared L2 distance for this collection.
+        # With normalized embeddings:
+        # cosine = 1 - (distance / 2)
+        similarity = 1 - (distance / 2)
 
         if similarity < SIMILARITY_THRESHOLD:
             continue
 
-        matches = title_matches(
-            query,
-            metadata
-        )
-
-        lexical_score = lexical_overlap(
-            query,
-            document
-        )
-
-        # Tested and tuned on the 55-question benchmark:
-        # semantic similarity + 0.10 * lexical overlap
-        hybrid_score = (
-    similarity
-    + LEXICAL_WEIGHT * lexical_score
-)
-
-        bonus = intent_bonus(
-            query,
-            metadata,
-            document
-        )
-
-        hybrid_score += bonus
-
+        # Cosine-only retrieval.
+        # Keep hybrid_score as an alias for compatibility with
+        # answer_engine_v3 and the existing frontend.
         candidates.append({
-
             "document": document,
-
             "metadata": metadata,
-
             "similarity": similarity,
-
-            "matches": matches,
-
-            "lexical_score": lexical_score,
-
-            "hybrid_score": hybrid_score
-
+            "lexical_score": 0.0,
+            "hybrid_score": similarity
         })
 
+    # Rank strictly by true cosine similarity.
     candidates.sort(
-        key=lambda x: x["hybrid_score"],
+        key=lambda x: x["similarity"],
         reverse=True
     )
 
@@ -557,3 +531,7 @@ if __name__ == "__main__":
         answer_question(
             question
         )
+
+
+
+
