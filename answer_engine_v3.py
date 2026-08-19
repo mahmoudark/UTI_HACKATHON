@@ -110,7 +110,87 @@ def select_evidence(query, results):
     return None, None
 
 
+# ============================================================
+# INPUT RISK CHECK
+# Must run BEFORE retrieval.
+# ============================================================
+
+OUT_OF_SCOPE_MEDICAL_TERMS = [
+    "diabetes",
+    "pneumonia",
+    "hypertension",
+    "high blood pressure",
+    "asthma",
+    "appendicitis",
+    "migraine",
+    "heart attack",
+    "influenza",
+    "chronic kidney disease",
+    "meningitis",
+]
+
+PERSONAL_ADVICE_PATTERNS = [
+    "for me",
+    "for myself",
+    "my father",
+    "my mother",
+    "my child",
+    "my son",
+    "my daughter",
+    "my husband",
+    "my wife",
+    "my patient",
+    "should i",
+    "can i take",
+    "can i use",
+    "is it safe for me",
+    "what should i do",
+    "do i need",
+]
+
+
+def input_risk_check(query):
+    q = normalize(query)
+
+    # Personal medical advice
+    for pattern in PERSONAL_ADVICE_PATTERNS:
+        if pattern in q:
+            return False, "Personal medical advice is outside the system scope."
+
+    # Known out-of-scope medical topics.
+    # Allow UTI-context questions to continue to retrieval;
+    # unsupported combinations can still be refused by later gates.
+    has_uti_context = (
+        "uti" in q
+        or "urinary tract infection" in q
+        or "lower urinary tract infection" in q
+        or "lower uti" in q
+    )
+
+    if not has_uti_context:
+        for term in OUT_OF_SCOPE_MEDICAL_TERMS:
+            if term in q:
+                return False, "The question is outside the UTI guideline scope."
+
+    return True, None
+
 def answer_with_guard(query):
+
+    # Check scope BEFORE retrieval.
+    safe, risk_reason = input_risk_check(query)
+
+    if not safe:
+        return {
+            "status": "REFUSED",
+            "reason": risk_reason,
+            "answer": None,
+            "source": None,
+            "rank": None,
+            "confidence": "INSUFFICIENT",
+            "grounding": None,
+            "results": []
+        }
+
     results = hybrid_search(query, top_k=TOP_K)
     if not results:
         return {
@@ -214,5 +294,6 @@ if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("V3 TESTING COMPLETED")
     print("=" * 70)
+
 
 
