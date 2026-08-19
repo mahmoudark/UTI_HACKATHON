@@ -29,20 +29,29 @@ def detect_populations(text):
 
 def population_compatible(query, result):
     qpop = detect_populations(query)
+
     if not qpop:
         return True
+
     source_text = normalize(" ".join([
         str(result["metadata"].get("title", "")),
         str(result["metadata"].get("source_id", "")),
     ]))
-    if "pregnant women" in source_text and "pregnant_women" not in qpop:
-        return False
-    if "non-pregnant women" in source_text and "non_pregnant_women" not in qpop:
-        return False
-    if "men aged 16 years and over" in source_text and "men" not in qpop:
-        return False
-    if "children and young people under 16 years" in source_text and "children" not in qpop:
-        return False
+
+    # Check NON-PREGNANT before PREGNANT because
+    # "pregnant women" is a substring of "non-pregnant women".
+    if "non-pregnant women" in source_text:
+        return "non_pregnant_women" in qpop
+
+    if "pregnant women" in source_text:
+        return "pregnant_women" in qpop
+
+    if "men aged 16 years and over" in source_text:
+        return "men" in qpop
+
+    if "children and young people under 16 years" in source_text:
+        return "children" in qpop
+
     return True
 
 
