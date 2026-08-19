@@ -7,7 +7,7 @@ from intent_classifier import detect_intent, intent_bonus
 # FINAL SETTINGS
 # ============================================================
 
-TOP_K = 5
+TOP_K = 4
 SIMILARITY_THRESHOLD = 0.20
 LEXICAL_WEIGHT = 0.10
 
