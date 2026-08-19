@@ -245,7 +245,10 @@ def answer_with_guard(query):
         "status": "ANSWERED",
         "reason": "Evidence passed retrieval and validation checks.",
         "answer": answer, "source": best["metadata"], "rank": rank,
-        "confidence": confidence, "grounding": coverage, "results": results
+        "confidence": confidence,
+        "evidence_match": best.get("evidence_match"),
+        "grounding": coverage,
+        "results": results
     }
 
 
@@ -295,6 +298,8 @@ if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("V3 TESTING COMPLETED")
     print("=" * 70)
+
+
 
 
 

@@ -1,0 +1,461 @@
+﻿<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UTI Clinical Decision Support</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#191c1e",
+                      "secondary": "#565e74",
+                      "inverse-surface": "#2d3133",
+                      "surface-container-low": "#f2f4f6",
+                      "on-surface-variant": "#434655",
+                      "surface-container": "#eceef0",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "on-secondary-container": "#5c647a",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#dae2fd",
+                      "tertiary": "#006329",
+                      "outline": "#737686",
+                      "error": "#ba1a1a",
+                      "on-error-container": "#93000a",
+                      "on-primary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-primary": "#b4c5ff",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-surface": "#191c1e",
+                      "primary": "#004ac6",
+                      "on-primary-fixed": "#00174b",
+                      "tertiary-container": "#007f36",
+                      "background": "#f7f9fb",
+                      "surface-tint": "#0053db",
+                      "surface-bright": "#f7f9fb",
+                      "on-tertiary-fixed": "#002109",
+                      "outline-variant": "#c3c6d7",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-primary-container": "#eeefff",
+                      "secondary-container": "#dae2fd",
+                      "surface-container-high": "#e6e8ea",
+                      "surface": "#f7f9fb",
+                      "surface-dim": "#d8dadc",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "on-tertiary-fixed-variant": "#005320",
+                      "primary-fixed": "#dbe1ff",
+                      "tertiary-fixed-dim": "#62df7d",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#131b2e",
+                      "on-tertiary-container": "#c7ffca",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed": "#7ffc97",
+                      "surface-variant": "#e0e3e5",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-tertiary": "#ffffff",
+                      "primary-container": "#2563eb"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "lg": "24px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "gutter": "16px",
+                      "container-padding": "20px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "label-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-md": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["18px", {"lineHeight": "26px", "fontWeight": "600"}],
+                      "headline-lg": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen overflow-hidden flex">
+<!-- SideNavBar from JSON -->
+<aside class="bg-on-background dark:bg-inverse-surface border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-screen w-[240px] flex flex-col h-full py-lg px-md z-20">
+<!-- Header -->
+<div class="mb-lg">
+<div class="text-headline-lg font-headline-lg text-surface-container-lowest dark:text-surface-container-lowest flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_box</span>
+<span>UTI Clinical Decision Support</span>
+</div>
+<div class="text-label-md font-label-md text-surface-container-highest">Clinical AI Workspace</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 space-y-2">
+<!-- Active Tab: Ask Question -->
+<a class="bg-primary-container text-on-primary-container rounded-lg font-bold flex items-center gap-sm px-sm py-2 scale-98 active:scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="text-label-md font-label-md">Ask Question</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="text-on-primary-fixed-variant hover:bg-on-secondary-fixed-variant transition-colors hover:bg-on-secondary-fixed-variant dark:hover:bg-secondary-fixed-dim transition-all flex items-center gap-sm px-sm py-2 rounded-lg scale-98 active:scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-md font-label-md">History</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:bg-on-secondary-fixed-variant transition-colors hover:bg-on-secondary-fixed-variant dark:hover:bg-secondary-fixed-dim transition-all flex items-center gap-sm px-sm py-2 rounded-lg scale-98 active:scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-label-md font-label-md">Sources</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:bg-on-secondary-fixed-variant transition-colors hover:bg-on-secondary-fixed-variant dark:hover:bg-secondary-fixed-dim transition-all flex items-center gap-sm px-sm py-2 rounded-lg scale-98 active:scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="text-label-md font-label-md">Validation</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:bg-on-secondary-fixed-variant transition-colors hover:bg-on-secondary-fixed-variant dark:hover:bg-secondary-fixed-dim transition-all flex items-center gap-sm px-sm py-2 rounded-lg scale-98 active:scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</nav>
+<!-- Footer Tab -->
+<div class="mt-auto pt-sm">
+<a class="text-on-primary-fixed-variant hover:bg-on-secondary-fixed-variant transition-colors hover:bg-on-secondary-fixed-variant dark:hover:bg-secondary-fixed-dim transition-all flex items-center gap-sm px-sm py-2 rounded-lg scale-98 active:scale-95 duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-label-md font-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Workspace -->
+<div class="flex-1 flex flex-col ml-[240px] w-full min-h-screen relative">
+<!-- TopAppBar from JSON -->
+<header class="bg-surface dark:bg-surface-dim flex justify-between items-center w-full h-14 px-gutter docked full-width top sticky z-10">
+<div class="flex items-center gap-sm">
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface dark:text-inverse-on-surface">UTI Treatment Dashboard</h1>
+<span class="text-label-md font-label-md text-secondary">Clinical Decision Support</span>
+</div>
+<div class="flex items-center gap-sm opacity-80 active:opacity-100">
+<button class="text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="text-secondary dark:text-secondary-fixed-dim hover:text-primary dark:hover:text-primary-fixed transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden border border-outline-variant ml-2">
+<span class="material-symbols-outlined text-secondary">person</span>
+</div>
+</div>
+</header>
+<!-- Dashboard Content Area -->
+<main class="flex-1 overflow-y-auto p-gutter bg-surface-container-low">
+<div class="max-w-7xl mx-auto h-full grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Center Workspace (Main Column) -->
+<section class="lg:col-span-7 flex flex-col gap-gutter">
+<!-- Header/Search Area -->
+<div class="bg-surface border border-outline-variant rounded-xl p-md shadow-sm">
+<h2 class="text-headline-md font-headline-md text-on-surface mb-1">Ask a Clinical Question</h2>
+<p class="text-body-sm font-body-sm text-secondary mb-4">Evidence-Grounded Clinical Question Answering</p>
+<div class="flex gap-sm">
+<input id="questionInput" class="flex-1 border border-outline-variant rounded-DEFAULT px-sm py-2 text-body-md font-body-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-surface-container-lowest" placeholder="What antibiotics are recommended for men aged 16 years and over?" type="text" value="" autocomplete="off"/>
+<button id="askButton" type="button" class="bg-primary text-on-primary px-lg py-2 rounded-DEFAULT text-label-md font-label-md font-bold hover:opacity-90 transition-opacity">Ask</button>
+</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span id="answerScope" class="text-label-sm font-label-sm text-secondary">Answers are grounded only in the indexed UTI guideline evidence.</span>
+</div>
+</div>
+<!-- Recommendation Card -->
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="bg-surface-container py-2 px-md border-b border-outline-variant">
+<h3 class="text-label-md font-label-md font-bold text-tertiary-container">Recommendation</h3>
+</div>
+<div class="p-md">
+<p id="recommendationText" class="text-body-md font-body-md text-on-surface text-secondary">Ask a clinical question to retrieve evidence-grounded guidance from the UTI guideline.</p>
+</div>
+</div>
+<!-- Evidence Excerpt -->
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="bg-surface-container py-2 px-md border-b border-outline-variant">
+<h3 class="text-label-md font-label-md font-bold text-on-surface">Evidence (Excerpt)</h3>
+</div>
+<div class="p-md bg-surface-container-lowest">
+<p id="evidenceExcerpt" class="text-body-md font-body-md text-on-surface italic border-l-4 border-outline-variant pl-sm">Retrieved evidence will appear here after you ask a question.</p>
+</div>
+</div>
+<!-- Citations & Metrics -->
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm p-md flex flex-col gap-sm">
+<h3 class="text-label-md font-label-md font-bold text-on-surface mb-2">Citations</h3>
+<div class="border border-outline-variant rounded-DEFAULT overflow-hidden">
+<table class="w-full text-left text-body-sm font-body-sm border-collapse">
+<thead class="bg-surface-container text-on-surface-variant border-b border-outline-variant">
+<tr>
+<th class="py-2 px-sm font-semibold border-r border-outline-variant">Document</th>
+<th class="py-2 px-sm font-semibold border-r border-outline-variant">Section</th>
+<th class="py-2 px-sm font-semibold">Page</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-surface-container-lowest border-b border-outline-variant last:border-0">
+<td id="citationDocument" class="py-2 px-sm border-r border-outline-variant">â€”</td>
+<td id="citationSection" class="py-2 px-sm border-r border-outline-variant">â€”</td>
+<td id="citationPage" class="py-2 px-sm">â€”</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center gap-gutter mt-sm pt-sm border-t border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-secondary">Confidence</span>
+<span id="confidenceBadge" class="bg-surface-container-high text-secondary text-xs px-2 py-0.5 rounded-sm font-medium border border-outline-variant">â€”</span>
+</div>
+<span id="validationNote" class="text-label-sm font-label-sm text-secondary flex-1 text-right">No question has been submitted yet.</span>
+</div>
+</div>
+</section>
+<!-- Right Panel (Evidence & Preview) -->
+<aside class="lg:col-span-5 flex flex-col gap-gutter h-full">
+<!-- Retrieved Evidence -->
+<div class="bg-surface border border-outline-variant rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden max-h-[50vh]">
+<div class="p-md border-b border-outline-variant bg-surface">
+<h2 class="text-headline-md font-headline-md text-on-surface">Retrieved Evidence (Top-K)</h2>
+</div>
+<div id="evidenceList" class="p-md space-y-sm overflow-y-auto bg-surface-container-low flex-1">
+<div id="evidenceEmpty" class="text-body-sm text-secondary py-6 text-center">No evidence retrieved yet.</div>
+</div>
+<div class="p-sm border-t border-outline-variant bg-surface flex justify-between text-[10px] text-secondary">
+<span id="topKMeta">Top-K: 5</span>
+<span>Similarity: cosine</span>
+<span id="thresholdMeta">Threshold: 0.60</span>
+</div>
+</div>
+<!-- Source Preview -->
+<div class="bg-surface border border-outline-variant rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden">
+<div class="p-md border-b border-outline-variant bg-surface">
+<h2 id="sourcePreviewTitle" class="text-headline-md font-headline-md text-on-surface">Source Preview</h2>
+</div>
+<div class="p-md bg-surface-container flex justify-center items-start overflow-y-auto flex-1">
+<!-- Simulated PDF Page -->
+<div id="sourcePreviewCard" class="bg-surface-container-lowest w-full max-w-[400px] border border-outline-variant shadow-sm p-lg flex flex-col text-on-surface">
+<div class="text-center border-b border-outline-variant pb-2 mb-4">
+<h4 id="previewSourceTitle" class="text-label-sm font-label-sm font-bold">UTI Guideline</h4>
+<p id="previewSourceType" class="text-[10px] text-secondary">Evidence-grounded source preview</p>
+</div>
+<h3 id="previewSection" class="text-body-md font-body-md font-bold mb-3 mt-4">Source preview</h3>
+<div class="text-body-sm font-body-sm leading-relaxed text-on-surface-variant">
+<p id="previewContext" class="mb-2">Ask a question to load the relevant guideline evidence.</p>
+<p id="previewHighlight" class="bg-yellow-100 p-1 rounded-sm border-l-2 border-yellow-400 text-on-surface inline">No evidence selected yet.</p>
+<p id="previewExtra" class="mt-2">The preview reflects the source metadata returned by the clinical backend.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant text-center text-[10px] text-secondary">
+                                    <span id="previewPage">Page â€”</span>
+                                </div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+
+<script>
+(function () {
+  const API_BASE = window.UTI_API_BASE_URL || 'http://127.0.0.1:8000';
+  const input = document.getElementById('questionInput');
+  const askButton = document.getElementById('askButton');
+  const recommendationText = document.getElementById('recommendationText');
+  const evidenceExcerpt = document.getElementById('evidenceExcerpt');
+  const confidenceBadge = document.getElementById('confidenceBadge');
+  const validationNote = document.getElementById('validationNote');
+  const citationDocument = document.getElementById('citationDocument');
+  const citationSection = document.getElementById('citationSection');
+  const citationPage = document.getElementById('citationPage');
+  const evidenceList = document.getElementById('evidenceList');
+  const evidenceEmpty = document.getElementById('evidenceEmpty');
+  const topKMeta = document.getElementById('topKMeta');
+  const thresholdMeta = document.getElementById('thresholdMeta');
+  const sourcePreviewTitle = document.getElementById('sourcePreviewTitle');
+  const previewSourceTitle = document.getElementById('previewSourceTitle');
+  const previewSourceType = document.getElementById('previewSourceType');
+  const previewSection = document.getElementById('previewSection');
+  const previewContext = document.getElementById('previewContext');
+  const previewHighlight = document.getElementById('previewHighlight');
+  const previewExtra = document.getElementById('previewExtra');
+  const previewPage = document.getElementById('previewPage');
+  const answerScope = document.getElementById('answerScope');
+
+  function setBadge(value) {
+    confidenceBadge.textContent = value || 'â€”';
+    confidenceBadge.className = 'text-xs px-2 py-0.5 rounded-sm font-medium border';
+    if (value === 'HIGH') {
+      confidenceBadge.classList.add('bg-green-50','text-green-700','border-green-200');
+    } else if (value === 'MEDIUM') {
+      confidenceBadge.classList.add('bg-amber-50','text-amber-700','border-amber-200');
+    } else if (value === 'LOW') {
+      confidenceBadge.classList.add('bg-slate-100','text-slate-700','border-slate-200');
+    } else if (value === 'INSUFFICIENT') {
+      confidenceBadge.classList.add('bg-red-50','text-red-700','border-red-200');
+    } else {
+      confidenceBadge.classList.add('bg-surface-container-high','text-secondary','border-outline-variant');
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (c) => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
+    }[c]));
+  }
+
+  function renderEvidence(results) {
+    const items = Array.isArray(results) ? results : [];
+    evidenceList.innerHTML = '';
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'text-body-sm text-secondary py-6 text-center';
+      empty.textContent = 'No evidence retrieved.';
+      evidenceList.appendChild(empty);
+      return;
+    }
+
+    items.forEach((item, index) => {
+      const meta = item.metadata || {};
+      const sourceId = meta.source_id || 'N/A';
+      const title = meta.title || sourceId;
+      const used = index === 0;
+      const card = document.createElement('div');
+      card.className = 'bg-surface border border-outline-variant rounded-DEFAULT p-sm flex flex-col gap-2';
+      card.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="${used ? 'bg-tertiary text-on-tertiary' : 'bg-secondary text-on-secondary'} text-xs px-1.5 py-0.5 rounded-sm font-mono">${item.evidence_match == null ? "—" : (Number(item.evidence_match) * 100).toFixed(0) + "%"}</span>
+          <span class="text-label-sm font-label-sm font-bold text-on-surface truncate">${escapeHtml(title)}</span>
+        </div>
+        <div class="text-[11px] text-secondary flex gap-4">
+          <span>Source: ${escapeHtml(sourceId)}</span>
+          <span>Cosine: ${Number(item.hybrid_score ?? 0).toFixed(4)}</span>
+        </div>
+        <div>
+          <span class="inline-block ${used ? 'bg-tertiary-container bg-opacity-10 text-tertiary border-tertiary' : 'bg-surface-container-high text-secondary border-outline-variant'} text-[10px] uppercase px-1.5 py-0.5 rounded-sm border">${used ? 'Used in answer' : 'Retrieved'}</span>
+        </div>`;
+      evidenceList.appendChild(card);
+    });
+  }
+
+  function showLoading() {
+    askButton.disabled = true;
+    askButton.classList.add('opacity-60','cursor-not-allowed');
+    askButton.textContent = 'Retrievingâ€¦';
+    recommendationText.textContent = 'Retrieving and validating clinical evidenceâ€¦';
+    recommendationText.classList.remove('text-secondary');
+    evidenceExcerpt.textContent = 'Waiting for validated evidenceâ€¦';
+    validationNote.textContent = 'Clinical evidence validation in progress.';
+    setBadge('');
+  }
+
+  function finishLoading() {
+    askButton.disabled = false;
+    askButton.classList.remove('opacity-60','cursor-not-allowed');
+    askButton.textContent = 'Ask';
+  }
+
+  async function ask() {
+    const query = input.value.trim();
+    if (!query) {
+      recommendationText.textContent = 'Please enter a clinical question.';
+      recommendationText.classList.add('text-secondary');
+      return;
+    }
+
+    showLoading();
+
+    try {
+      const response = await fetch(`${API_BASE}/api/answer`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query})
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      const source = result.source || {};
+      const results = result.results || [];
+      const best = results[0] || {};
+
+      setBadge(result.confidence);
+      if (result.status === 'ANSWERED') {
+        recommendationText.textContent = result.answer || 'No recommendation returned.';
+        recommendationText.classList.remove('text-secondary');
+        evidenceExcerpt.textContent = best.document || result.answer || 'Evidence retrieved from the guideline.';
+        validationNote.textContent = 'Evidence passed retrieval and validation checks.';
+      } else {
+        recommendationText.textContent = 'Insufficient Evidence â€” no clinical recommendation was generated.';
+        recommendationText.classList.add('text-secondary');
+        evidenceExcerpt.textContent = result.reason || 'Available evidence was insufficient or incompatible with the requested population.';
+        validationNote.textContent = result.reason || 'The clinical guard refused to provide a recommendation.';
+      }
+
+      citationDocument.textContent = source.title || source.source_id || 'â€”';
+      citationSection.textContent = source.source_id || 'â€”';
+      citationPage.textContent = source.pages || 'â€”';
+      topKMeta.textContent = `Top-K: ${results.length || 'â€”'}`;
+      thresholdMeta.textContent = 'Threshold: 0.60';
+      renderEvidence(results);
+
+      sourcePreviewTitle.textContent = source.pages ? `Source Preview (p.${source.pages})` : 'Source Preview';
+      previewSourceTitle.textContent = source.title || 'UTI Guideline';
+      previewSourceType.textContent = source.source_type || 'Evidence-grounded source';
+      previewSection.textContent = source.source_id ? `Source ${source.source_id}` : 'Source preview';
+      previewContext.textContent = query;
+      previewHighlight.textContent = best.document || result.answer || 'No source preview is available because the query did not pass evidence validation.';
+      previewExtra.textContent = result.status === 'ANSWERED'
+        ? 'Selected evidence returned by the clinical backend.'
+        : 'No clinical recommendation was generated.';
+      previewPage.textContent = source.pages ? `Page ${source.pages}` : 'Page â€”';
+      answerScope.textContent = 'Answers are grounded only in the indexed UTI guideline evidence.';
+
+    } catch (error) {
+      recommendationText.textContent = 'Backend connection unavailable.';
+      recommendationText.classList.add('text-secondary');
+      evidenceExcerpt.textContent = 'The clinical backend could not be reached. No medical answer was generated.';
+      validationNote.textContent = 'Connection error â€” no fallback medical content is used.';
+      setBadge('INSUFFICIENT');
+    } finally {
+      finishLoading();
+    }
+  }
+
+  askButton.addEventListener('click', ask);
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') ask();
+  });
+  if (evidenceEmpty) evidenceEmpty.remove();
+})();
+</script>
+
+</body></html>
+
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en"><head>
 <meta charset="utf-8"/>
@@ -222,9 +222,9 @@
 </thead>
 <tbody>
 <tr class="bg-surface-container-lowest border-b border-outline-variant last:border-0">
-<td id="citationDocument" class="py-2 px-sm border-r border-outline-variant">—</td>
-<td id="citationSection" class="py-2 px-sm border-r border-outline-variant">—</td>
-<td id="citationPage" class="py-2 px-sm">—</td>
+<td id="citationDocument" class="py-2 px-sm border-r border-outline-variant">â€”</td>
+<td id="citationSection" class="py-2 px-sm border-r border-outline-variant">â€”</td>
+<td id="citationPage" class="py-2 px-sm">â€”</td>
 </tr>
 </tbody>
 </table>
@@ -232,7 +232,7 @@
 <div class="flex items-center gap-gutter mt-sm pt-sm border-t border-outline-variant">
 <div class="flex items-center gap-2">
 <span class="text-label-sm font-label-sm text-secondary">Confidence</span>
-<span id="confidenceBadge" class="bg-surface-container-high text-secondary text-xs px-2 py-0.5 rounded-sm font-medium border border-outline-variant">—</span>
+<span id="confidenceBadge" class="bg-surface-container-high text-secondary text-xs px-2 py-0.5 rounded-sm font-medium border border-outline-variant">â€”</span>
 </div>
 <span id="validationNote" class="text-label-sm font-label-sm text-secondary flex-1 text-right">No question has been submitted yet.</span>
 </div>
@@ -251,7 +251,7 @@
 <div class="p-sm border-t border-outline-variant bg-surface flex justify-between text-[10px] text-secondary">
 <span id="topKMeta">Top-K: 5</span>
 <span>Similarity: cosine</span>
-<span id="thresholdMeta">Threshold: 0.20</span>
+<span id="thresholdMeta">Threshold: 0.60</span>
 </div>
 </div>
 <!-- Source Preview -->
@@ -273,7 +273,7 @@
 <p id="previewExtra" class="mt-2">The preview reflects the source metadata returned by the clinical backend.</p>
 </div>
 <div class="mt-auto pt-4 border-t border-outline-variant text-center text-[10px] text-secondary">
-                                    <span id="previewPage">Page —</span>
+                                    <span id="previewPage">Page â€”</span>
                                 </div>
 </div>
 </div>
@@ -310,7 +310,7 @@
   const answerScope = document.getElementById('answerScope');
 
   function setBadge(value) {
-    confidenceBadge.textContent = value || '—';
+    confidenceBadge.textContent = value || 'â€”';
     confidenceBadge.className = 'text-xs px-2 py-0.5 rounded-sm font-medium border';
     if (value === 'HIGH') {
       confidenceBadge.classList.add('bg-green-50','text-green-700','border-green-200');
@@ -332,46 +332,80 @@
   }
 
   function renderEvidence(results) {
-    const items = Array.isArray(results) ? results : [];
-    evidenceList.innerHTML = '';
-    if (!items.length) {
-      const empty = document.createElement('div');
-      empty.className = 'text-body-sm text-secondary py-6 text-center';
-      empty.textContent = 'No evidence retrieved.';
-      evidenceList.appendChild(empty);
-      return;
+  const items = Array.isArray(results) ? results : [];
+  evidenceList.innerHTML = '';
+
+  if (!items.length) {
+    const empty = document.createElement('div');
+    empty.className = 'text-body-sm text-secondary py-6 text-center';
+    empty.textContent = 'No evidence retrieved.';
+    evidenceList.appendChild(empty);
+    return;
+  }
+
+  items.forEach((item, index) => {
+    const meta = item.metadata || {};
+    const sourceId = meta.source_id || 'N/A';
+    const title = meta.title || sourceId;
+    const used = index === 0;
+
+    const cosine = Number(item.similarity ?? 0);
+    const matchScore = item.match_score;
+
+    let scoreLabel = '—';
+    let scoreClass =
+      'bg-surface-container-high text-secondary border-outline-variant';
+
+    if (matchScore != null) {
+      scoreLabel = `${Number(matchScore).toFixed(2)}`;
+      scoreClass = used
+        ? 'bg-tertiary text-on-tertiary'
+        : 'bg-secondary text-on-secondary';
     }
 
-    items.forEach((item, index) => {
-      const meta = item.metadata || {};
-      const sourceId = meta.source_id || 'N/A';
-      const title = meta.title || sourceId;
-      const used = index === 0;
-      const card = document.createElement('div');
-      card.className = 'bg-surface border border-outline-variant rounded-DEFAULT p-sm flex flex-col gap-2';
-      card.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span class="${used ? 'bg-tertiary text-on-tertiary' : 'bg-secondary text-on-secondary'} text-xs px-1.5 py-0.5 rounded-sm font-mono">${Number(item.similarity ?? 0).toFixed(4)}</span>
-          <span class="text-label-sm font-label-sm font-bold text-on-surface truncate">${escapeHtml(title)}</span>
-        </div>
-        <div class="text-[11px] text-secondary flex gap-4">
-          <span>Source: ${escapeHtml(sourceId)}</span>
-          <span>Hybrid: ${Number(item.hybrid_score ?? 0).toFixed(4)}</span>
-        </div>
-        <div>
-          <span class="inline-block ${used ? 'bg-tertiary-container bg-opacity-10 text-tertiary border-tertiary' : 'bg-surface-container-high text-secondary border-outline-variant'} text-[10px] uppercase px-1.5 py-0.5 rounded-sm border">${used ? 'Used in answer' : 'Retrieved'}</span>
-        </div>`;
-      evidenceList.appendChild(card);
-    });
-  }
+    const card = document.createElement('div');
+
+    card.className =
+      'bg-surface border border-outline-variant rounded-DEFAULT p-sm flex flex-col gap-2';
+
+    card.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="${scoreClass} text-xs px-1.5 py-0.5 rounded-sm font-mono">
+          ${scoreLabel}
+        </span>
+
+        <span class="text-label-sm font-label-sm font-bold text-on-surface truncate">
+          ${escapeHtml(title)}
+        </span>
+      </div>
+
+      <div class="text-[11px] text-secondary flex gap-4">
+        <span>Source: ${escapeHtml(sourceId)}</span>
+
+      </div>
+
+      <div>
+        <span class="inline-block ${
+          used
+            ? 'bg-tertiary-container bg-opacity-10 text-tertiary border-tertiary'
+            : 'bg-surface-container-high text-secondary border-outline-variant'
+        } text-[10px] uppercase px-1.5 py-0.5 rounded-sm border">
+          ${used ? 'Used in answer' : 'Retrieved'}
+        </span>
+      </div>
+    `;
+
+    evidenceList.appendChild(card);
+  });
+}
 
   function showLoading() {
     askButton.disabled = true;
     askButton.classList.add('opacity-60','cursor-not-allowed');
-    askButton.textContent = 'Retrieving…';
-    recommendationText.textContent = 'Retrieving and validating clinical evidence…';
+    askButton.textContent = 'Retrievingâ€¦';
+    recommendationText.textContent = 'Retrieving and validating clinical evidenceâ€¦';
     recommendationText.classList.remove('text-secondary');
-    evidenceExcerpt.textContent = 'Waiting for validated evidence…';
+    evidenceExcerpt.textContent = 'Waiting for validated evidenceâ€¦';
     validationNote.textContent = 'Clinical evidence validation in progress.';
     setBadge('');
   }
@@ -412,17 +446,17 @@
         evidenceExcerpt.textContent = best.document || result.answer || 'Evidence retrieved from the guideline.';
         validationNote.textContent = 'Evidence passed retrieval and validation checks.';
       } else {
-        recommendationText.textContent = 'Insufficient Evidence — no clinical recommendation was generated.';
+        recommendationText.textContent = 'Insufficient Evidence â€” no clinical recommendation was generated.';
         recommendationText.classList.add('text-secondary');
         evidenceExcerpt.textContent = result.reason || 'Available evidence was insufficient or incompatible with the requested population.';
         validationNote.textContent = result.reason || 'The clinical guard refused to provide a recommendation.';
       }
 
-      citationDocument.textContent = source.title || source.source_id || '—';
-      citationSection.textContent = source.source_id || '—';
-      citationPage.textContent = source.pages || '—';
-      topKMeta.textContent = `Top-K: ${results.length || '—'}`;
-      thresholdMeta.textContent = 'Threshold: 0.20';
+      citationDocument.textContent = source.title || source.source_id || 'â€”';
+      citationSection.textContent = source.source_id || 'â€”';
+      citationPage.textContent = source.pages || 'â€”';
+      topKMeta.textContent = `Top-K: ${results.length || 'â€”'}`;
+      thresholdMeta.textContent = 'Threshold: 0.60';
       renderEvidence(results);
 
       sourcePreviewTitle.textContent = source.pages ? `Source Preview (p.${source.pages})` : 'Source Preview';
@@ -434,14 +468,14 @@
       previewExtra.textContent = result.status === 'ANSWERED'
         ? 'Selected evidence returned by the clinical backend.'
         : 'No clinical recommendation was generated.';
-      previewPage.textContent = source.pages ? `Page ${source.pages}` : 'Page —';
+      previewPage.textContent = source.pages ? `Page ${source.pages}` : 'Page â€”';
       answerScope.textContent = 'Answers are grounded only in the indexed UTI guideline evidence.';
 
     } catch (error) {
       recommendationText.textContent = 'Backend connection unavailable.';
       recommendationText.classList.add('text-secondary');
       evidenceExcerpt.textContent = 'The clinical backend could not be reached. No medical answer was generated.';
-      validationNote.textContent = 'Connection error — no fallback medical content is used.';
+      validationNote.textContent = 'Connection error â€” no fallback medical content is used.';
       setBadge('INSUFFICIENT');
     } finally {
       finishLoading();
@@ -457,3 +491,8 @@
 </script>
 
 </body></html>
+
+
+
+
+

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UTI Clinical Assistant - Active Conversation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#131b2e",
+                        "surface-tint": "#0053db",
+                        "on-tertiary": "#ffffff",
+                        "background": "#faf8ff",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dae2fd",
+                        "primary-fixed": "#dbe1ff",
+                        "primary-container": "#2563eb",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#ffede6",
+                        "surface-bright": "#faf8ff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "secondary": "#006c49",
+                        "outline": "#737686",
+                        "secondary-fixed-dim": "#4edea3",
+                        "inverse-surface": "#283044",
+                        "error": "#ba1a1a",
+                        "surface": "#faf8ff",
+                        "primary": "#004ac6",
+                        "surface-container": "#eaedff",
+                        "on-surface-variant": "#434655",
+                        "surface-container-highest": "#dae2fd",
+                        "surface-container-high": "#e2e7ff",
+                        "on-secondary-container": "#00714d",
+                        "on-tertiary-fixed": "#360f00",
+                        "tertiary-fixed": "#ffdbcd",
+                        "tertiary-container": "#bc4800",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-dim": "#d2d9f4",
+                        "inverse-on-surface": "#eef0ff",
+                        "outline-variant": "#c3c6d7",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f2f3ff",
+                        "inverse-primary": "#b4c5ff",
+                        "tertiary": "#943700",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-primary-fixed": "#00174b",
+                        "on-secondary-fixed": "#002113",
+                        "secondary-container": "#6cf8bb",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-primary-container": "#eeefff",
+                        "on-background": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "48px",
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max": "1200px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill-1 {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface h-screen flex overflow-hidden font-body-md">
+<!-- TopNavBar (Mobile Only) -->
+<nav class="md:hidden flex justify-between items-center w-full px-margin-mobile py-4 bg-surface fixed top-0 z-50">
+<div class="font-headline-md text-headline-md font-bold text-on-surface">UTI Clinical Assistant</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity cursor-pointer">account_circle</span>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col bg-surface-container-low h-screen w-[280px] flex-shrink-0 border-r border-outline-variant fixed left-0 top-0 z-40">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8 cursor-pointer hover:opacity-80 transition-opacity">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined">local_hospital</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">Clinical Workspace</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Verified Guidelines</p>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary py-3 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-8">
+<span class="material-symbols-outlined">add</span>
+                New Chat
+            </button>
+<nav class="flex flex-col gap-2">
+<!-- Recent Chats (Active/Expanded) -->
+<div class="group">
+<a class="flex items-center gap-3 px-3 py-2 text-primary font-semibold bg-surface-container rounded-lg scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-body-md text-body-md">Recent Chats</span>
+<span class="material-symbols-outlined ml-auto text-sm transition-transform rotate-180">expand_more</span>
+</a>
+<div class="pl-9 pr-3 py-2 flex flex-col gap-2">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface truncate" href="#">Antibiotic treatment for pregnancy</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface truncate" href="#">Recurrent UTI prophylaxis</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface truncate" href="#">Penicillin allergy alternatives</a>
+</div>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-body-md text-body-md">Sources</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-body-md text-body-md">Help</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col md:ml-[280px] h-screen bg-background pt-[72px] md:pt-0 relative">
+<!-- TopNavBar (Desktop) -->
+<header class="hidden md:flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto bg-surface absolute top-0 left-0 right-0 z-30">
+<div class="font-headline-md text-headline-md font-bold text-on-surface">UTI Clinical Assistant</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity cursor-pointer text-[28px]" data-icon="account_circle">account_circle</span>
+</div>
+</header>
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto px-margin-mobile md:px-margin-desktop pb-[120px] pt-6 md:pt-[88px] flex flex-col items-center">
+<div class="w-full max-w-[800px] flex flex-col gap-6">
+<!-- User Message -->
+<div class="flex justify-end">
+<div class="bg-surface-container text-on-surface rounded-2xl rounded-tr-sm px-5 py-4 max-w-[85%] border border-surface-variant shadow-sm">
+<p class="font-body-md text-body-md">What antibiotics are recommended for pregnant women aged 12 years and over?</p>
+</div>
+</div>
+<!-- AI Response -->
+<div class="flex flex-col gap-3">
+<div class="flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">robot_2</span>
+</div>
+<div class="bg-surface-container-lowest text-on-surface rounded-2xl rounded-tl-sm px-5 py-4 w-full border border-outline-variant">
+<p class="font-body-md text-body-md mb-4 font-semibold">According to the UTI guideline, nitrofurantoin is the first-choice antibiotic. Amoxicillin may be considered when culture results show susceptibility, and cefalexin is an alternative second choice.</p>
+<!-- Evidence Section -->
+<div class="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl overflow-hidden mt-4">
+<div class="p-4 flex items-center justify-between border-b border-[#BBF7D0]">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[20px]">description</span>
+<span class="font-label-md text-label-md">UTI Guideline · Table 2 · Page 13</span>
+</div>
+<div class="flex items-center gap-1 bg-white px-2 py-1 rounded-full border border-[#BBF7D0] text-[#166534] shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-label-sm text-label-sm">Evidence Grounded</span>
+</div>
+</div>
+<!-- Expandable Excerpt -->
+<details class="group">
+<summary class="flex justify-between items-center cursor-pointer p-4 hover:bg-[#DCFCE7] transition-colors text-secondary-container-on font-label-md text-label-md list-none [&amp;::-webkit-details-marker]:hidden">
+<span>Evidence used</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="p-4 pt-0 text-on-surface-variant font-body-sm text-body-sm bg-[#F0FDF4]">
+<p class="pl-4 border-l-2 border-[#86EFAC] italic">"For pregnant women aged 12 years and over with a lower UTI, first choice: Nitrofurantoin... Alternative choices if no improvement on first choice or first choice not suitable: Amoxicillin (only if culture results available and susceptible) or Cefalexin."</p>
+</div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Composer -->
+<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background to-transparent pt-10 pb-6 px-margin-mobile md:px-margin-desktop flex justify-center">
+<div class="w-full max-w-[800px] relative">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] focus-within:border-primary focus-within:shadow-[0_4px_20px_rgba(37,99,235,0.08)] transition-all flex items-end p-2">
+<textarea class="w-full bg-transparent border-none focus:ring-0 resize-none py-3 px-3 font-body-md text-body-md text-on-surface placeholder:text-outline max-h-[120px] overflow-y-auto" oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 120) + 'px';" placeholder="Ask a clinical question..." rows="1"></textarea>
+<div class="flex items-center gap-2 pb-1 pr-1">
+<button aria-label="Attach clinical data" class="p-2 text-outline hover:text-primary transition-colors rounded-lg hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+</button>
+<button aria-label="Send message" class="p-2 bg-primary-container text-on-primary rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</div>
+<div class="text-center mt-3">
+<p class="font-label-sm text-label-sm text-outline">AI-generated clinical guidance. Verify with source documentation before treatment.</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>
