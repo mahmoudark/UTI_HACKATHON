@@ -1,4 +1,4 @@
-import re
+﻿import re
 from ask import hybrid_search, generate_answer, TOP_K, SIMILARITY_THRESHOLD, LEXICAL_WEIGHT
 
 POPULATION_TERMS = {
@@ -148,6 +148,18 @@ def answer_with_guard(query):
             "confidence": confidence, "grounding": coverage, "results": results
         }
 
+    # Calibrate uncertainty language to evidence strength.
+    if confidence == "HIGH":
+        answer = "The guideline recommends:\n\n" + answer.strip()
+
+    elif confidence == "MEDIUM":
+        answer = "The guideline suggests:\n\n" + answer.strip()
+
+    elif confidence == "LOW":
+        answer = (
+            "Limited evidence found; consider consulting the full guideline.\n\n"
+            + answer.strip()
+        )
     return {
         "status": "ANSWERED",
         "reason": "Evidence passed retrieval and validation checks.",
@@ -202,3 +214,5 @@ if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("V3 TESTING COMPLETED")
     print("=" * 70)
+
+
