@@ -16,14 +16,41 @@ def normalize(text):
 def detect_populations(text):
     t = normalize(text)
     found = set()
-    if "non-pregnant women" in t or "nonpregnant women" in t:
+
+    # Non-pregnant women / woman
+    if (
+        "non-pregnant women" in t
+        or "nonpregnant women" in t
+        or "non-pregnant woman" in t
+        or "nonpregnant woman" in t
+    ):
         found.add("non_pregnant_women")
-    elif "pregnant women" in t or "pregnant" in t:
+
+    # Pregnant women / woman
+    elif (
+        "pregnant women" in t
+        or "pregnant woman" in t
+        or "pregnant" in t
+    ):
         found.add("pregnant_women")
-    if "men" in t or "male" in t:
+
+    # Men / male / man
+    if (
+        "men" in t
+        or "male" in t
+        or "man" in t
+    ):
         found.add("men")
-    if "children" in t or "young people" in t or "under 16" in t:
+
+    # Children / young people
+    if (
+        "children" in t
+        or "child" in t
+        or "young people" in t
+        or "under 16" in t
+    ):
         found.add("children")
+
     return found
 
 
